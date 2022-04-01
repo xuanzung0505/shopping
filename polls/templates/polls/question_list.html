@@ -1,0 +1,11 @@
+{%extends 'polls/base.html'%}
+{%block contentt%}
+    {%if question%}
+    {%for item in question%}
+        <a href="{%url 'polls:questionDetail' item.id%}"><li>{{item.question_text}}</li></a>
+    {%endfor%}
+    <!-- <li>{{question.question_text}}</li> -->
+    {%else%}
+    <p>there are no questions!!!</p>
+    {%endif%}
+{%endblock%}

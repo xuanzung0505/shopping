@@ -1,0 +1,9 @@
+{%extends 'polls/base.html'%}
+{%block contentt%}
+        <h2>Tai san cua TXD</h2>
+        {%for item in taisan%}
+            {%if item != "tai san 2"%}
+                <li>{{item}}</li>
+            {%endif%}
+        {%endfor%}
+{%endblock%}

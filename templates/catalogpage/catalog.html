@@ -1,0 +1,130 @@
+{%extends 'base.html'%}
+{%load static%}
+
+{%block cssblock%}
+<link rel="stylesheet" href="{%static 'assets/bootstrap/css/bootstrap.min.css'%}">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i,600,600i">
+<link rel="stylesheet" href="{%static 'assets/fonts/simple-line-icons.min.css'%}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css">
+<link rel="stylesheet" href="{%static 'assets/css/vanilla-zoom.min.css'%}">
+<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+{%endblock%}
+
+{%include 'navbar.html'%}
+
+{%block content%}
+<main class="page catalog-page">
+    <section class="clean-block clean-catalog dark">
+        <div class="container">
+            <div class="block-heading">
+                <h2 class="text-info">Catalog Page</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc quam urna, dignissim nec auctor in,
+                    mattis vitae leo.</p>
+            </div>
+            <div class="content">
+                <br>
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6">
+                        <div class="input-group" id="search">
+                            {% csrf_token %}
+                            <input type="search" class="form-control rounded" placeholder="Search all items by name"
+                                aria-label="Search" aria-describedby="search-addon" id="searchInfo" />
+                            <button type="button" class="btn btn-outline-primary">search</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-none d-md-block">
+                            <div class="filters">
+                                <div class="filter-item" id="categorylist">
+                                    <h3>Categories</h3>
+                                    <div class="form-check"><input class="form-check-input" type="radio" value="0"
+                                        name="category" id="category0" checked><label class="form-check-label"
+                                        for="category0">None</label></div>
+                                    {%for category in categoryList%}
+                                        <div class="form-check"><input class="form-check-input" type="radio" value={{category.id}}
+                                            name="category" id="category{{category.id}}"><label class="form-check-label"
+                                            for="category{{category.id}}">{{category.title}}</label></div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-md-none"><a class="btn btn-link d-md-none filter-collapse"
+                                data-bs-toggle="collapse" aria-expanded="false" aria-controls="filters" href="#filters"
+                                role="button">Filters<i class="icon-arrow-down filter-caret"></i></a>
+                            <div class="collapse" id="filters">
+                                <div class="filters">
+                                    <div class="filter-item" id="categorylist">
+                                        <h3>Categories</h3>
+                                        <div class="form-check"><input class="form-check-input" type="radio" value="0"
+                                            name="category_col" id="category0" checked><label class="form-check-label"
+                                            for="category0">None</label></div>
+                                        {%for category in categoryList%}
+                                            <div class="form-check"><input class="form-check-input" type="radio" value={{category.id}}
+                                                name="category_col" id="category{{category.id}}"><label class="form-check-label"
+                                                for="category{{category.id}}">{{category.title}}</label></div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="products">
+                            <div class="row g-0" id="productList">
+                                {%for product in productlist%}
+                                <div class="col-12 col-md-6 col-lg-4" id="product">
+                                    <div class="clean-product-item">
+                                        <div class="image"><a href="{%url 'shopping:productdetail' product.id%}"><img
+                                                    class="img-fluid d-block mx-auto"
+                                                    src="{%static product.product_img %}"></a></div>
+                                        <div class="product-name"><a
+                                                href="{%url 'shopping:productdetail' product.id%}">{{product.title}}</a>
+                                        </div>
+                                        <div class="about">
+                                            <div class="rating"><img src="{%static 'assets/img/star.svg'%}"><img
+                                                    src="{%static 'assets/img/star.svg'%}"><img
+                                                    src="{%static 'assets/img/star.svg'%}"><img
+                                                    src="{%static 'assets/img/star-half-empty.svg'%}"><img
+                                                    src="{%static 'assets/img/star-empty.svg'%}"></div>
+                                            <div class="price">
+                                                <h3>{{product.price}}$</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {%endfor%}
+                            </div>
+                            <nav>
+                                <ul class="pagination">
+                                    <li class="page-item disabled"><a class="page-link" href="#"
+                                            aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#" aria-label="Next"><span
+                                                aria-hidden="true">»</span></a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{%endblock%}
+
+{%include 'footer.html'%}
+
+{%block jsblock%}
+<script src="{%static 'assets/bootstrap/js/bootstrap.min.js'%}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.js"></script>
+<script src="{%static 'assets/js/vanilla-zoom.js'%}"></script>
+<script src="{%static 'assets/js/theme.js'%}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{%static 'js/catalog.js'%}"></script>
+{%endblock%}

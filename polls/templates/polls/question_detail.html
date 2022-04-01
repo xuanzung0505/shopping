@@ -1,0 +1,16 @@
+{%extends 'polls/base.html'%}
+{%block contentt%}
+    {%if question.choice_set.all%}
+        <p>{{question.question_text}}</p>
+        <form action="{%url 'polls:vote' question.id%}" method="post">
+            {%csrf_token%}
+            {%for item in question.choice_set.all%}
+                <p><input type="radio" value="{{item.id}}" name="choicee">{{item.choice_text}}</p>
+            {%endfor%}
+            <input type="submit" value="send choice">
+        </form>
+        <a href="{%url 'polls:questionList'%}"><p>Danh sach cau hoi</p></a>
+    {%else%}
+        <p>there are no choices!!!</p>
+    {%endif%}
+{%endblock%}

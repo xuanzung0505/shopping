@@ -1,0 +1,11 @@
+{%extends 'polls/base.html'%}
+{%block contentt%}
+    {%if question%}
+        <p>Ket qua cuoc binh chon la:</p>
+        {%for item in question.choice_set.all%}
+            <p>{{item.choice_text}}:{{item.vote}}</p>
+        {%endfor%}
+
+        <a href="{%url 'polls:questionDetail' question.id%}"><p>Vote tiep</p></a>
+    {%endif%}
+{%endblock%}

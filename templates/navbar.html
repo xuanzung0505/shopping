@@ -1,0 +1,18 @@
+<nav class="navbar navbar-light navbar-expand-lg fixed-top bg-white clean-navbar">
+    <div class="container"><a class="navbar-brand logo" href="{%url 'shopping:index'%}">Shopping</a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navcol-1">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{%url 'shopping:index'%}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{%url 'shopping:catalog'%}">Catalog</a></li>
+                <li class="nav-item"><a class="nav-link" href="{%url 'shopping:cart'%}">Cart</a></li>
+                <li class="nav-item"><a class="nav-link" href="{%url 'shopping:checkout'%}">Checkout</a></li>
+                <li class="nav-item"><a class="nav-link" href="{%url 'shopping:order'%}">Order</a></li>
+                {% if request.user.username %}
+                    <li class="nav-item"><a class="nav-link" href="#">Welcome, {{request.user.username}}</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="#">Welcome, guest</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
