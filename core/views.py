@@ -1,10 +1,10 @@
-from multiprocessing import context
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
 from django.views import View
-from product.models import Product, Category
-from cart.models import Cart, CartItem
-from order.models import Order
+
+# from product.models import Product, Category
+# from cart.models import Cart, CartItem
+# from order.models import Order
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,6 +12,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
 from django.core import serializers
 
+#DAO
+from businesslogic.productDAO.ProductDAO import ProductDAO
+from businesslogic.categoryDAO.CategoryDAO import CategoryDAO
+from businesslogic.cartDAO.CartDAO import CartDAO
+from businesslogic.orderDAO.OrderDAO import OrderDAO
+from businesslogic.userDAO.UserDAO import UserDAO
+
+#REST
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from product.serializers import GetAllProductSerializer, GetAllCategorySerializer, ProductSerializer
+from user.serializers import GetAllUserSerializer
+from cart.serializers import GetAllCartSerializer, GetAllCartItemSerializer
+from order.serializers import GetAllOrderSerializer
 # Create your views here.
 
 class indexPage(View):
@@ -31,11 +47,13 @@ class loginPage(View):
         login(request, myuser) #sign in
         return render(request, 'indexpage/index.html')
 
+
 class catalogPage(LoginRequiredMixin, View):
     login_url='../login/'
     def get(self,request):
-        productList = Product.objects.filter(active=True)
-        categoryList = Category.objects.filter(active=True)
+        # productList = Product.objects.filter(active=True)
+        productList = ProductDAO.getActiveProduct()
+        categoryList = CategoryDAO.getActiveCategory()
         # print(productList.count())
         context = {"productlist":productList, "categoryList": categoryList}
         return render(request,'catalogpage/catalog.html',context)
@@ -43,9 +61,10 @@ class catalogPage(LoginRequiredMixin, View):
 class catalogSearch(LoginRequiredMixin, View):
     login_url='../login/'
     def post(self, request, search_query):
-
-        product_qset = Product.objects.filter(title__icontains = search_query, active=True)
         
+        # product_qset = Product.objects.filter(title__icontains = search_query, active=True)
+        product_qset = ProductDAO.searchActiveProductByName(search_query)
+
         qset_json = serializers.serialize('json', product_qset)
 
         # size = int(product_qset.count())
@@ -57,17 +76,14 @@ class catalogFilter(LoginRequiredMixin, View):
     def post(self, request, category_id):
         
         if(int(category_id) != 0):
-            
-            category = Category.objects.get(pk=category_id)
-            product_qset = Product.objects.filter(category = category, active=True)
+            category = CategoryDAO.getCategoryByID(category_id)
+            product_qset = ProductDAO.searchActiveProductByCategory(category)
             
             qset_json = serializers.serialize('json', product_qset)
         else:
-            product_qset = Product.objects.filter(active=True)
-            
+            product_qset = ProductDAO.getActiveProduct()            
             qset_json = serializers.serialize('json', product_qset)
         
-
         # size = int(product_qset.count())
 
         return JsonResponse(qset_json, status=200, safe=False)
@@ -87,12 +103,14 @@ class catalogFilter(LoginRequiredMixin, View):
 class detailPage(LoginRequiredMixin, View):
     login_url='../login/'
     def get(self, request, product_id):
-        product = Product.objects.get(pk=product_id)
+        # product = Product.objects.get(pk=product_id)
+        product = ProductDAO.getProductByID(product_id)
         context = {"product":product}
         return render(request,'productdetailpage/productdetail.html',context)
 
     def post(self, request, product_id):
-        product = Product.objects.get(pk=product_id)
+        # product = Product.objects.get(pk=product_id)
+        product = ProductDAO.getProductByID(product_id)
 
         quantity = int(request.POST.get('quantity'))
        
@@ -102,23 +120,24 @@ class detailPage(LoginRequiredMixin, View):
         #get the cart from user credentials
         user = request.user
         
-        cart_qset = Cart.objects.filter(user = user, is_ordered = False) #get the ONLY cart
+        cart_qset = CartDAO.getFreeCartByUser(user) #get the ONLY cart
         #if none then create new cart
-        cart = Cart(user=user)
+        cart = CartDAO.createCartByUser(user)
         
         for item in cart_qset:
             cart = item
-        cart.save()
+        CartDAO.saveCart(cart)
 
         cartTotalPrice = float(cart.totalPrice)
 
         #change the cartitem matched with the selected product
-        cartitem_qset = CartItem.objects.filter(cart = cart, item = product) #cartitem query set ONLY 1
+        cartitem_qset = CartDAO.getACartItemByProduct(cart, product)
+        # cartitem_qset = CartItem.objects.filter(cart = cart, item = product) #cartitem query set ONLY 1
           
         totalPrice = float(product.price) * quantity
         if cartitem_qset.count() == 0: #does not exist
-            cartitem = CartItem(cart = cart, item = product, price = product.price, quantity = quantity, totalPrice = totalPrice) 
-            cartitem.save()
+            cartitem = CartDAO.createCartItem(cart, product, quantity, totalPrice)
+            CartDAO.saveCartItem(cartitem)
 
         else: #exists so add more
             for cartitem in cartitem_qset:
@@ -129,12 +148,12 @@ class detailPage(LoginRequiredMixin, View):
 
                 #save the new totalPrice
                 cartitem.totalPrice = cartitem.price * cartitem.quantity
-                cartitem.save()
+                CartDAO.saveCartItem(cartitem)
 
         #add totalprice to carttotal
         cartTotalPrice += totalPrice
         cart.totalPrice = cartTotalPrice
-        cart.save()
+        CartDAO.saveCart(cart)
 
         context = {"product":product}
         return render(request,'productdetailpage/productdetail.html',context)
@@ -144,15 +163,15 @@ class cartPage(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
 
-        cart_qset = Cart.objects.filter(user = user, is_ordered = False) #get the ONLY cart
+        cart_qset = CartDAO.getFreeCartByUser(user) #get the ONLY cart
         #if none then create new cart
-        cart = Cart(user=user)
+        cart = CartDAO.createCartByUser(user)
         
         for item in cart_qset:
             cart = item
-        cart.save()
-
-        cartitem_qset = CartItem.objects.filter(cart = cart) #get all cartitems in that cart
+        CartDAO.saveCart(cart)
+        
+        cartitem_qset = CartDAO.getAllCartItem(cart)
         
         context = { "cart":cart
             ,"cartitem_set":cartitem_qset}
@@ -167,9 +186,8 @@ class cartItemDelete(LoginRequiredMixin, View):
     def post(self, request, id):
         user = request.user
         
-        cartItem = CartItem.objects.get(id = id)
-
-        cart_qset = Cart.objects.filter(user = user, is_ordered = False) #get the ONLY cart
+        cartItem = CartDAO.getACartItemByID(id)
+        cart_qset = CartDAO.getFreeCartByUser(user)
         for item in cart_qset:
             cart = item
 
@@ -178,9 +196,9 @@ class cartItemDelete(LoginRequiredMixin, View):
         cartTotalPrice -= cartItemTotalPrice
         
         cart.totalPrice = cartTotalPrice
-        cart.save()
+        CartDAO.saveCart(cart)
 
-        cartItem.delete()
+        CartDAO.deleteCartItem(cartItem)
         return JsonResponse({'result' : 'ok', 'cartTotal' : str(cartTotalPrice)}, status=200)
 
 class cartItemQuantityChange(LoginRequiredMixin, View):
@@ -188,9 +206,9 @@ class cartItemQuantityChange(LoginRequiredMixin, View):
     def post(self,request,id, quantity):
         user = request.user
             
-        cartItem = CartItem.objects.get(id = id)
+        cartItem = CartDAO.getACartItemByID(id)
+        cart_qset = CartDAO.getFreeCartByUser(user)
 
-        cart_qset = Cart.objects.filter(user = user, is_ordered = False) #get the ONLY cart
         for item in cart_qset:
             cart = item
 
@@ -198,34 +216,34 @@ class cartItemQuantityChange(LoginRequiredMixin, View):
         cartItemTotalPriceNew = float(cartItem.price) * int(quantity)
         cartItem.quantity = int(quantity)
         cartItem.totalPrice = cartItemTotalPriceNew
-        cartItem.save()
+        CartDAO.saveCartItem(cartItem)
 
         #also update the cart
         cartTotalPrice = 0.0
-        cartItem_qset = CartItem.objects.filter(cart = cart)
+        cartItem_qset = CartDAO.getAllCartItem(cart)
         for cartItem in cartItem_qset:
             cartTotalPrice += float(cartItem.totalPrice)
 
         cart.totalPrice = cartTotalPrice
-        cart.save()
+        CartDAO.saveCart(cart)
 
         return JsonResponse({'result':'ok', 'cartItemTotal': str(cartItemTotalPriceNew),
         'cartTotal': str(cartTotalPrice)}, status=200)
         
 
 class checkoutPage(LoginRequiredMixin, View):
-    login_url='../login'
+    login_url='../login/'
     def get(self,request):
         user = request.user
 
-        cart_qset = Cart.objects.filter(user = user, is_ordered = False) #get the ONLY cart
+        cart_qset = CartDAO.getFreeCartByUser(user)
         #if none then create new cart
-        cart = Cart(user=user)
+        cart = CartDAO.createCartByUser(user)
         for item in cart_qset:
             cart = item
-        cart.save()
+        CartDAO.saveCart(cart)
 
-        cartitem_qset = CartItem.objects.filter(cart = cart) #get all cartitems in that cart
+        cartitem_qset = CartDAO.getAllCartItem(cart)
         
         context = { "cart":cart
             ,"cartitem_set":cartitem_qset}
@@ -235,7 +253,7 @@ class checkoutPage(LoginRequiredMixin, View):
     def post(self,request):
         user = request.user
 
-        cart_qset = Cart.objects.filter(user = user) #get the ONLY cart
+        cart_qset = CartDAO.getFreeCartByUser(user)
         for item in cart_qset:
             cart = item
 
@@ -252,17 +270,17 @@ class checkoutPage(LoginRequiredMixin, View):
 
         order_total = cart.totalPrice
 
-        order = Order(user = user, cart = cart, shipping_address = shipping_address,
-        order_description = order_description, order_total = order_total)
+        order = OrderDAO.createOrder(user, cart, shipping_address, 
+        order_description, order_total)
         
         try:
-            order.save()
+            OrderDAO.saveOrder(order)
         except:
             return HttpResponse("Order failed!")
             
         #succeed
-        cart.is_ordered = True
-        cart.save()
+        CartDAO.setOrdered(cart, True)
+        CartDAO.saveCart(cart)
         # return HttpResponse("hehe")
         return render(request,'successpage/success.html')
 
@@ -271,19 +289,74 @@ class successPage(View):
         return render(request, 'successpage/success.html')
 
 class orderPage(LoginRequiredMixin, View):
+    login_url='../login/'
     def get(self, request):
         user = request.user
 
-        order_qset = Order.objects.filter(user = user) #get all order
+        order_qset = OrderDAO.getAllOrderByUser(user)
         context = {"orderList": order_qset}
         return render(request, 'orderpage/order.html', context)
 
 class orderDetailPage(LoginRequiredMixin, View):
+    login_url='../login/'
     def get(self, request, order_id):
-        order = Order.objects.get(pk= order_id) #get all order
+        order = OrderDAO.getOrderByID(order_id)
         cart = order.cart
 
-        cartitem_qset = CartItem.objects.filter(cart = cart) #get all cartitems in that cart
+        cartitem_qset = CartDAO.getAllCartItem(cart)
 
         context={"cart": cart, "cartitem_set": cartitem_qset, "order": order}
         return render(request, 'orderdetailpage/orderdetail.html', context)
+
+#rest
+class getAllProductAPIView(APIView):
+    def get(self, request):
+        list_product = ProductDAO.getActiveProduct()
+        mydata = GetAllProductSerializer(list_product, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        mydata = ProductSerializer(data=request.data)
+
+        if not mydata.is_valid():
+            return Response("sai du lieu", status=status.HTTP_400_BAD_REQUEST)
+
+        title = mydata.data['title']
+        description = mydata.data['description']
+        category = mydata.data['category']
+        product_img = mydata.data['product_img']
+        price = mydata.data['price']
+        active = mydata.data['active']
+        newProd = ProductDAO.createProduct(title=title, description=description, category=category,
+        product_img=product_img, price=price, active=active)
+        return Response(data=newProd.id, status=status.HTTP_200_OK)
+
+class getAllCategoryAPIView(APIView):
+    def get(self, request):
+        list_category = CategoryDAO.getActiveCategory()
+        mydata = GetAllCategorySerializer(list_category, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getAllUserAPIView(APIView):
+    def get(self, request):
+        list_user = UserDAO.getAllUser()
+        mydata = GetAllUserSerializer(list_user, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getAllCartAPIView(APIView):
+    def get(self, request):
+        list_cart = CartDAO.getAllCart()
+        mydata = GetAllCartSerializer(list_cart, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getAllCartItemAPIView(APIView):
+    def get(self, request, cart_id):
+        list_cartitem = CartDAO.getAllCartItem(cart_id)
+        mydata = GetAllCartItemSerializer(list_cartitem, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getAllOrderAPIView(APIView):
+    def get(self, request):
+        list_order = OrderDAO.getAllOrder()
+        mydata = GetAllOrderSerializer(list_order, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)

@@ -23,4 +23,12 @@ urlpatterns = [
     # path('success/', views.successPage.as_view(), name='success'),
     path('order/', views.orderPage.as_view(), name='order'),
     path('order/<int:order_id>/', views.orderDetailPage.as_view(), name='orderdetail'),
+    
+    #rest framework
+    path('api/product/', views.getAllProductAPIView.as_view()),
+    path('api/category/', views.getAllCategoryAPIView.as_view()),
+    path('api/user/', views.getAllUserAPIView.as_view()),
+    path('api/cart/', views.getAllCartAPIView.as_view()),
+    path('api/cartitem/<str:cart_id>/', views.getAllCartItemAPIView.as_view()),
+    path('api/order/', views.getAllOrderAPIView.as_view()),
 ]
