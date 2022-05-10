@@ -25,10 +25,20 @@ urlpatterns = [
     path('order/<int:order_id>/', views.orderDetailPage.as_view(), name='orderdetail'),
     
     #rest framework
-    path('api/product/', views.getAllProductAPIView.as_view()),
+    path('api/product/', views.getAllProductAPIView.as_view()), #can add new product
+    path('api/product/<str:product_id>', views.getAProductAPIView.as_view()),
+
     path('api/category/', views.getAllCategoryAPIView.as_view()),
+    path('api/category/<str:category_id>', views.getACategoryAPIView.as_view()),
+
     path('api/user/', views.getAllUserAPIView.as_view()),
+    path('api/user/<str:user_id>', views.getAUserAPIView.as_view()),
+
     path('api/cart/', views.getAllCartAPIView.as_view()),
+    path('api/cart/<str:user_id>', views.getCartByUserAPIView.as_view()),
+
     path('api/cartitem/<str:cart_id>/', views.getAllCartItemAPIView.as_view()),
+
     path('api/order/', views.getAllOrderAPIView.as_view()),
+    path('api/order/<str:user_id>', views.getOrderByUserAPIView.as_view()),
 ]

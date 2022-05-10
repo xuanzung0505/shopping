@@ -14,6 +14,10 @@ class CartDAO():
         cart_qset = Cart.objects.filter(user = user, is_ordered = False) #get the ONLY cart
         return cart_qset
 
+    def getAllCartByUser(user):
+        cart_qset = Cart.objects.filter(user = user) #get the ONLY cart
+        return cart_qset
+
     def getACartItemByID(id):
         cartItem = CartItem.objects.get(id = id)
         return cartItem

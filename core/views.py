@@ -315,26 +315,38 @@ class getAllProductAPIView(APIView):
         mydata = GetAllProductSerializer(list_product, many=True)
         return Response(data=mydata.data, status=status.HTTP_200_OK)
     
-    def post(self, request):
-        mydata = ProductSerializer(data=request.data)
+    def post(self, request): #post a new product
+        mydata = GetAllProductSerializer(data=request.data)
 
         if not mydata.is_valid():
             return Response("sai du lieu", status=status.HTTP_400_BAD_REQUEST)
 
-        title = mydata.data['title']
-        description = mydata.data['description']
-        category = mydata.data['category']
+        title = mydata.data.get('title')
+        description = mydata.data.get('description')
+        category_id = mydata.data.get('category')
         product_img = mydata.data['product_img']
         price = mydata.data['price']
         active = mydata.data['active']
-        newProd = ProductDAO.createProduct(title=title, description=description, category=category,
+        newProd = ProductDAO.createProduct(title=title, description=description, category_id=category_id,
         product_img=product_img, price=price, active=active)
         return Response(data=newProd.id, status=status.HTTP_200_OK)
+
+class getAProductAPIView(APIView):
+    def get(self, request, product_id):
+        product = ProductDAO.getProductByID(product_id)
+        mydata = GetAllProductSerializer(product)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
 
 class getAllCategoryAPIView(APIView):
     def get(self, request):
         list_category = CategoryDAO.getActiveCategory()
         mydata = GetAllCategorySerializer(list_category, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getACategoryAPIView(APIView):
+    def get(self, request, category_id):
+        category = CategoryDAO.getCategoryByID(category_id)
+        mydata = GetAllCategorySerializer(category)
         return Response(data=mydata.data, status=status.HTTP_200_OK)
 
 class getAllUserAPIView(APIView):
@@ -343,9 +355,22 @@ class getAllUserAPIView(APIView):
         mydata = GetAllUserSerializer(list_user, many=True)
         return Response(data=mydata.data, status=status.HTTP_200_OK)
 
+class getAUserAPIView(APIView):
+    def get(self, request, user_id):
+        user = UserDAO.getUserByID(user_id)
+        mydata = GetAllUserSerializer(user)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
 class getAllCartAPIView(APIView):
     def get(self, request):
         list_cart = CartDAO.getAllCart()
+        mydata = GetAllCartSerializer(list_cart, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getCartByUserAPIView(APIView):
+    def get(self, request, user_id):
+        user = UserDAO.getUserByID(user_id)
+        list_cart = CartDAO.getAllCartByUser(user)
         mydata = GetAllCartSerializer(list_cart, many=True)
         return Response(data=mydata.data, status=status.HTTP_200_OK)
 
@@ -358,5 +383,12 @@ class getAllCartItemAPIView(APIView):
 class getAllOrderAPIView(APIView):
     def get(self, request):
         list_order = OrderDAO.getAllOrder()
+        mydata = GetAllOrderSerializer(list_order, many=True)
+        return Response(data=mydata.data, status=status.HTTP_200_OK)
+
+class getOrderByUserAPIView(APIView):
+    def get(self, request, user_id):
+        user = UserDAO.getUserByID(user_id)
+        list_order = OrderDAO.getAllOrderByUser(user)
         mydata = GetAllOrderSerializer(list_order, many=True)
         return Response(data=mydata.data, status=status.HTTP_200_OK)

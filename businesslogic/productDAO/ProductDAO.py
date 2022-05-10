@@ -1,9 +1,9 @@
-from product.models import Product
+from product.models import Product, Category
 
 class ProductDAO():
-    def createProduct(title, description, category, product_img, price, active):
+    def createProduct(title, description, category_id, product_img, price, active):
         newProd = Product.objects.create(title=title, description=description, 
-        category=category, product_img=product_img, price=price, active=active)
+        category=Category.objects.get(pk=category_id), product_img=product_img, price=price, active=active)
         return newProd
 
     def getActiveProduct():
