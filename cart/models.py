@@ -15,4 +15,4 @@ class CartItem(models.Model):
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.FloatField(default=0)
     quantity = models.IntegerField(default=0)
-    totalPrice = models.FloatField(default=0)
+    totalPrice = models.FloatField(default=0) #hehehe
