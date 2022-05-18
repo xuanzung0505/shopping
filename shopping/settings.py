@@ -43,6 +43,11 @@ INSTALLED_APPS = [
     'order',
     'user',
     'core',
+    'item',
+    'bookitem',
+    'electronicsitem',
+    'shoesitem',
+    'clothesitem',
     'rest_framework',
 ]
 
