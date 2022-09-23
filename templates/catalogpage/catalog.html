@@ -75,6 +75,8 @@
                     <div class="col-md-9">
                         <div class="products">
                             <div class="row g-0" id="productList">
+                                {{productlist|json_script:"json-data"}}
+                                
                                 {%for product in productlist%}
                                 <div class="col-12 col-md-6 col-lg-4" id="product">
                                     <div class="clean-product-item">
@@ -99,13 +101,13 @@
                                 {%endfor%}
                             </div>
                             <nav>
-                                <ul class="pagination">
-                                    <li class="page-item disabled"><a class="page-link" href="#"
+                                <ul class="pagination" id="pagi">
+                                    <li class="page-item disabled" id="pagiItem" name="prev"><a class="page-link" href="#"
                                             aria-label="Previous"><span aria-hidden="true">«</span></a></li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#" aria-label="Next"><span
+                                    <li class="page-item active" id="pagiItem" value="1"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item" id="pagiItem" value="2"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item" id="pagiItem" value="3"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item" id="pagiItem" name="next"><a class="page-link" href="#" aria-label="Next"><span
                                                 aria-hidden="true">»</span></a></li>
                                 </ul>
                             </nav>

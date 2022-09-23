@@ -1,3 +1,4 @@
+from dataclasses import fields
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
 from django.views import View
@@ -11,6 +12,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.forms.models import model_to_dict
 from django.core import serializers
+
+#json
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 #DAO
 from businesslogic.productDAO.ProductDAO import ProductDAO
@@ -55,7 +60,15 @@ class catalogPage(LoginRequiredMixin, View):
         productList = ProductDAO.getActiveProduct()
         categoryList = CategoryDAO.getActiveCategory()
         # print(productList.count())
-        context = {"productlist":productList, "categoryList": categoryList}
+        # data = serializers.serialize('json', list(productList),fields="__all__")
+
+        data = GetAllProductSerializer(productList, many=True)
+        # return Response(data=mydata.data, status=status.HTTP_200_OK)
+        # data = json.dumps(list(productList), cls=DjangoJSONEncoder)
+        res = data.data
+        # print(list(res))
+        # print("json dumps:" + json.dumps(list(res)))
+        context = {"productlist":data.data, "categoryList": categoryList}
         return render(request,'catalogpage/catalog.html',context)
 
 class catalogSearch(LoginRequiredMixin, View):
