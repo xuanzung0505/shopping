@@ -65,6 +65,23 @@ function clean(data){
     // console.log("pageData after cleaning: "+pageData)
 }
 
+function appendData(pk,title,price,product_img){
+    $("#productList").append('<div class="col-12 col-md-6 col-lg-4" id="product">' +
+                '<div class="clean-product-item">' +
+                '<div class="image" style="height:25vh;"><a href="' + "/shopping/detail/" + pk + 
+                '"><img class="img-fluid d-block mx-auto" style="margin: 0; position: relative; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);" src="/static/' + 
+                product_img + '"></a></div>' +
+                '<div class="product-name"><a href="' + "/shopping/detail/" + pk + '">' + title + '</a></div>' +
+                '<div class="about">' +
+                '<div class="rating"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star-half-empty.svg"><img src="/static/assets/img/star-empty.svg"></div>' +
+                '<div class="price">' +
+                '<h3>' + Number(price).toFixed(1) + '$</h3>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>')
+}
+
 function renderData(){
     // console.log("type of data:"+typeof(pageData))
     // console.log(pageData)
@@ -80,18 +97,7 @@ function renderData(){
         product_img = item.product_img;
 
         // console.log(pk, title, price, product_img)
-        $("#productList").append('<div class="col-12 col-md-6 col-lg-4" id="product">' +
-                '<div class="clean-product-item">' +
-                '<div class="image"><a href="' + "/shopping/detail/" + pk + '"><img class="img-fluid d-block mx-auto" src="/static/' + product_img + '"></a></div>' +
-                '<div class="product-name"><a href="' + "/shopping/detail/" + pk + '">' + title + '</a></div>' +
-                '<div class="about">' +
-                '<div class="rating"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star-half-empty.svg"><img src="/static/assets/img/star-empty.svg"></div>' +
-                '<div class="price">' +
-                '<h3>' + Number(price).toFixed(1) + '$</h3>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>')
+        appendData(pk,title,price,product_img)
     }
 }
 
@@ -143,18 +149,7 @@ function loadPage(chosenPage){
         product_img = item.product_img;
 
         // console.log(pk, title, price, product_img)
-        $("#productList").append('<div class="col-12 col-md-6 col-lg-4" id="product">' +
-            '<div class="clean-product-item">' +
-            '<div class="image"><a href="' + "/shopping/detail/" + pk + '"><img class="img-fluid d-block mx-auto" src="/static/' + product_img + '"></a></div>' +
-            '<div class="product-name"><a href="' + "/shopping/detail/" + pk + '">' + title + '</a></div>' +
-            '<div class="about">' +
-            '<div class="rating"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star-half-empty.svg"><img src="/static/assets/img/star-empty.svg"></div>' +
-            '<div class="price">' +
-            '<h3>' + Number(price).toFixed(1) + '$</h3>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '</div>')
+        appendData(pk,title,price,product_img)
     }
     }, 1000);
 
