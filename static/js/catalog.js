@@ -89,7 +89,7 @@ function appendData(pk,title,price,product_img){
 function renderData(){
     // console.log("type of data:"+typeof(pageData))
     // console.log(pageData)
-
+    
     for(var i = (current_page-1) * records_per_page; (i <= current_page * records_per_page - 1)
     && i < pageData.length; i++){
         var item = pageData[i] 
@@ -105,12 +105,33 @@ function renderData(){
     }
 }
 
-function loadPage(chosenPage){
-    // console.log("chosen page: "+chosenPage)
+function update(){
+    
+    //push to top
     $('html, body').animate({ scrollTop: 0 }, 'fast');
+
     setTimeout(function(){
         //do what you need here
+        //reset products
+        resetData('#product')
+                        
+        //reset pagination
+        resetPagination()
+
+        //render pagination
+        renderPagination()
+
+        //render new products
+        renderData();
+    }, 1000);
+}
+
+function loadPage(chosenPage){
+    // console.log("chosen page: "+chosenPage)
     
+    //push to top
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
+
     var ele
     var eles = document.getElementById("pagi").getElementsByTagName('li');
 
@@ -141,22 +162,31 @@ function loadPage(chosenPage){
     current_page = chosenPage;
     // console.log("current page: "+current_page);
 
-    resetData("#product")
-    
-    for(var i = (current_page-1) * records_per_page; (i <= current_page * records_per_page - 1)
-    && i < pageData.length; i++){
-        var item = pageData[i] 
-        var pk,title,price,product_img;
-        
-        pk = item.id;
-        title = item.title;
-        price = item.price;
-        product_img = item.product_img;
+    setTimeout(function(){
+        //do what you need here
+            
+        //reset products
+        resetData('#product')
 
-        // console.log(pk, title, price, product_img)
-        appendData(pk,title,price,product_img)
-    }
+        //render new products
+        renderData();
     }, 1000);
+
+    // resetData("#product")
+    
+    // for(var i = (current_page-1) * records_per_page; (i <= current_page * records_per_page - 1)
+    // && i < pageData.length; i++){
+    //     var item = pageData[i] 
+    //     var pk,title,price,product_img;
+        
+    //     pk = item.id;
+    //     title = item.title;
+    //     price = item.price;
+    //     product_img = item.product_img;
+
+    //     // console.log(pk, title, price, product_img)
+    //     appendData(pk,title,price,product_img)
+    // }
 
 }
 
@@ -170,16 +200,9 @@ function init(){
     current_page = 1;
     // console.log("data from textContent:"+data)
     
-    //reset products
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
+
     resetData('#product')
-                    
-    //reset pagination
-    resetPagination()
-
-    //render pagination
-    renderPagination()
-
-    //render new products
     renderData();
 }
 
@@ -258,17 +281,7 @@ $(document).ready(function () {
                     current_page = 1;
                     // const productList = document.querySelectorAll('#productlist') //get all element with id 'productList'
 
-                    //reset products
-                    resetData('#product')
-                    
-                    //reset pagination
-                    resetPagination()
-
-                    //render pagination
-                    renderPagination()
-
-                    //render new products
-                    renderData();
+                    update()
 
                     // const category_inputs = document.querySelectorAll('#category0') //get all element with above id
                     // category_inputs.forEach(function (category_input) {
@@ -319,17 +332,7 @@ $(document).ready(function () {
                 current_page = 1;
                 // const productList = document.querySelectorAll('#productlist') //get all element with id 'productList'
 
-                //reset products
-                resetData('#product')
-                
-                //reset pagination
-                resetPagination()
-
-                //render pagination
-                renderPagination()
-
-                //render new products
-                renderData();
+                update()
 
                 $("#searchInfo").val("")
             }
@@ -371,17 +374,7 @@ $(document).ready(function () {
                 current_page = 1;
                 // const productList = document.querySelectorAll('#productlist') //get all element with id 'productList'
 
-                //reset products
-                resetData('#product')
-                
-                //reset pagination
-                resetPagination()
-
-                //render pagination
-                renderPagination()
-
-                //render new products
-                renderData();
+                update()
 
                 $("#searchInfo").val("")
             }
