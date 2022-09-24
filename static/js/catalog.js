@@ -28,7 +28,11 @@ function renderPagination(){
     for(var page = 2; page <= numPages; page++){
         $("#pagi").append('<li class="page-item" id="pagiItem" value="'+page+'"><a class="page-link" href="#">'+page+'</a></li>')
     }
-    $("#pagi").append('<li class="page-item" id="pagiItem" name="next"><a class="page-link" href="#" aria-label="Next"><span'+
+    if (findNumPages() == 1)
+        $("#pagi").append('<li class="page-item disabled" id="pagiItem" name="next"><a class="page-link" href="#" aria-label="Next"><span'+
+    'aria-hidden="true">»</span></a></li>')
+    else
+        $("#pagi").append('<li class="page-item" id="pagiItem" name="next"><a class="page-link" href="#" aria-label="Next"><span'+
     'aria-hidden="true">»</span></a></li>')
 }
 
@@ -102,10 +106,11 @@ function renderData(){
 }
 
 function loadPage(chosenPage){
+    // console.log("chosen page: "+chosenPage)
     $('html, body').animate({ scrollTop: 0 }, 'fast');
     setTimeout(function(){
         //do what you need here
-        
+    
     var ele
     var eles = document.getElementById("pagi").getElementsByTagName('li');
 
