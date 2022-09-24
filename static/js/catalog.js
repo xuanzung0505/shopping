@@ -11,8 +11,8 @@ function findNumPages()
 function resetPagination(){
     numPages = findNumPages();
     
-    console.log("data length: "+pageData.length)
-    console.log("number of pages: "+numPages)
+    // console.log("data length: "+pageData.length)
+    // console.log("number of pages: "+numPages)
     
     const pagiItem = document.querySelectorAll('#pagiItem') //get all element with id 'pagiItem'
     pagiItem.forEach(function () {
@@ -40,7 +40,7 @@ function resetData(tag){
 }
 
 function clean(data){
-    console.log("cleaning data...")
+    // console.log("cleaning data...")
     var newData = [];
 
     jQuery(data).each(function (i, item) {
@@ -66,8 +66,8 @@ function clean(data){
 }
 
 function renderData(){
-    console.log("type of data:"+typeof(pageData))
-    console.log(pageData)
+    // console.log("type of data:"+typeof(pageData))
+    // console.log(pageData)
 
     for(var i = (current_page-1) * records_per_page; (i <= current_page * records_per_page - 1)
     && i < pageData.length; i++){
@@ -95,13 +95,36 @@ function renderData(){
     }
 }
 
-function loadPage(element, chosenPage){
+function loadPage(chosenPage){
+    var ele
+    var eles = document.getElementById("pagi").getElementsByTagName('li');
 
-    $("#pagiItem.active").removeClass("active");
-    element.addClass("active");
-    
+    for(let i = 0; i < eles.length; i ++){
+        if(eles[i].value == chosenPage) {
+            ele = eles[i]
+            console.log("find")
+        }
+    }
+
+    console.log(ele)
+    ele.className += " active"
+
+    if (chosenPage != 1){
+        $("#pagiItem[name='prev']").removeClass("disabled");
+    }
+    else{
+        $("#pagiItem[name='prev']").addClass("disabled");
+    }
+
+    if (chosenPage < findNumPages()){
+        $("#pagiItem[name='next']").removeClass("disabled");
+    }
+    else{
+        $("#pagiItem[name='next']").addClass("disabled");
+    }
+
     current_page = chosenPage;
-    console.log("current page: "+current_page);
+    // console.log("current page: "+current_page);
 
     resetData("#product")
     
@@ -131,11 +154,10 @@ function loadPage(element, chosenPage){
     }
 }
 
-
 function init(){
     //init
     var prep = document.getElementById('json-data').textContent;
-    console.log("prep from textContent: "+prep)
+    // console.log("prep from textContent: "+prep)
 
     var data = JSON.parse(prep);
     pageData = data;
@@ -168,17 +190,27 @@ $(document).ready(function () {
         //event here
         if(page != 0){
             if(page != current_page && page <= numPages){
-                console.log("OK")
-                
-                loadPage($(this),page);
+                console.log("OK");
+
+                //remove active before call addClass()
+                $("#pagiItem.active").removeClass("active");
+                // $(this).addClass("active")
+
+                loadPage(page);
             }
         }
         else{
             if(option == 'prev' && current_page>1){
-                console.log("prev")
+                // console.log("prev")                
+                $("#pagiItem.active").removeClass("active");
+
+                loadPage(current_page-1)
             }
             if(option == 'next' && current_page<numPages){
-                console.log("next")
+                // console.log("next")
+                $("#pagiItem.active").removeClass("active");
+
+                loadPage(current_page+1)
             }
         }
     })
@@ -192,7 +224,7 @@ $(document).ready(function () {
         // console.log(csrfToken)
 
         var searchQuery = $.trim($("#searchInfo").val())
-        console.log("search query: "+searchQuery)
+        // console.log("search query: "+searchQuery)
 
         if (searchQuery == '') {
             window.location.href = "/shopping/catalog/"
@@ -268,11 +300,11 @@ $(document).ready(function () {
             type: 'post',
             dataType: 'json',
             success: function (response) {
-                console.log(JSON.stringify(response));
+                // console.log(JSON.stringify(response));
                 var obj = jQuery.parseJSON(JSON.stringify(response)); //better JSON
 
-                console.log(typeof obj)
-                console.log(obj)
+                // console.log(typeof obj)
+                // console.log(obj)
 
                 var data = JSON.parse(obj);
                 pageData = data;
@@ -320,11 +352,11 @@ $(document).ready(function () {
             type: 'post',
             dataType: 'json',
             success: function (response) {
-                console.log(JSON.stringify(response));
+                // console.log(JSON.stringify(response));
                 var obj = jQuery.parseJSON(JSON.stringify(response)); //better JSON
 
-                console.log(typeof obj)
-                console.log(obj)
+                // console.log(typeof obj)
+                // console.log(obj)
 
                 var data = JSON.parse(obj);
                 pageData = data;
