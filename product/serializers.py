@@ -8,11 +8,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GetAllProductSerializer(serializers.ModelSerializer):
     # category_id = CategorySerializer(source='category')
-    category_detail = CategorySerializer(source='category',read_only = True)
+    # category_detail = CategorySerializer(source='category',read_only = True)
     
     class Meta:
         model = Product
-        fields="__all__"
+        fields=('id', 'title','description', 'category', 'product_img', 
+        'price', 'active')
 
     # def to_representation(self, instance):
     #     self.fields['category'] =  CategorySerializer(read_only=True)

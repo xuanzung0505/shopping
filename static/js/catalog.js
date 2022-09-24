@@ -1,15 +1,17 @@
-let current_page = 1;
-let records_per_page = 9;
+var numPages;
+var current_page;
+var records_per_page = 9;
+var pageData;
 
-function findNumPages(data)
+function findNumPages()
 {
-    return Math.ceil(data.length / records_per_page);
+    return Math.ceil(pageData.length / records_per_page);
 }
 
-function resetPagination(data){
-    var numPages = findNumPages(data);
+function resetPagination(){
+    numPages = findNumPages();
     
-    console.log("data length: "+data.length)
+    console.log("data length: "+pageData.length)
     console.log("number of pages: "+numPages)
     
     const pagiItem = document.querySelectorAll('#pagiItem') //get all element with id 'pagiItem'
@@ -18,8 +20,8 @@ function resetPagination(data){
     })
 }
 
-function renderPagination(data){
-    var numPages = findNumPages(data);
+function renderPagination(){
+    numPages = findNumPages();
     $("#pagi").append('<li class="page-item disabled" id="pagiItem" name="prev"><a class="page-link" href="#'
     +'aria-label="Previous"><span aria-hidden="true">«</span></a></li>')
     $("#pagi").append('<li class="page-item active" id="pagiItem" value="'+1+'"><a class="page-link" href="#">'+1+'</a></li>')
@@ -37,51 +39,151 @@ function resetData(tag){
     })
 }
 
-function renderData(data){
+function clean(data){
+    console.log("cleaning data...")
+    var newData = [];
+
     jQuery(data).each(function (i, item) {
-        console.log(item.pk, item.fields.title, item.fields.price, item.fields.product_img)
+        // console.log(item.pk, item.fields.title, item.fields.price, item.fields.product_img)
+        // var fields = item.fields;
+
+        // console.log(typeof(fields))
+        // console.log(fields)
+        var aNewData = {"id":item.pk, "title":item.fields.title, "price":item.fields.price, 
+            "product_img":item.fields.product_img, "description":item.fields.description, 
+            "category":item.fields.category, "active": item.fields.active}
+        // console.log("aNewData:"+aNewData)
+
+        // aNewData = Object.assign({},aNewData)
+        // data = new Map(Object.entries(fields))
+        newData.push(aNewData)    
+        // console.log("fields:"+fields)
+        // console.log("aNewData:"+aNewData)
+    })
+    // pageData = Object.assign({},newData);
+    pageData = newData;
+    // console.log("pageData after cleaning: "+pageData)
+}
+
+function renderData(){
+    console.log("type of data:"+typeof(pageData))
+    console.log(pageData)
+
+    for(var i = (current_page-1) * records_per_page; (i <= current_page * records_per_page - 1)
+    && i < pageData.length; i++){
+        var item = pageData[i] 
+        var pk,title,price,product_img;
+
+        pk = item.id;
+        title = item.title;
+        price = item.price;
+        product_img = item.product_img;
+
+        // console.log(pk, title, price, product_img)
+        $("#productList").append('<div class="col-12 col-md-6 col-lg-4" id="product">' +
+                '<div class="clean-product-item">' +
+                '<div class="image"><a href="' + "/shopping/detail/" + pk + '"><img class="img-fluid d-block mx-auto" src="/static/' + product_img + '"></a></div>' +
+                '<div class="product-name"><a href="' + "/shopping/detail/" + pk + '">' + title + '</a></div>' +
+                '<div class="about">' +
+                '<div class="rating"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star-half-empty.svg"><img src="/static/assets/img/star-empty.svg"></div>' +
+                '<div class="price">' +
+                '<h3>' + Number(price).toFixed(1) + '$</h3>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>')
+    }
+}
+
+function loadPage(element, chosenPage){
+
+    $("#pagiItem.active").removeClass("active");
+    element.addClass("active");
+    
+    current_page = chosenPage;
+    console.log("current page: "+current_page);
+
+    resetData("#product")
+    
+    for(var i = (current_page-1) * records_per_page; (i <= current_page * records_per_page - 1)
+    && i < pageData.length; i++){
+        var item = pageData[i] 
+        var pk,title,price,product_img;
+        
+        pk = item.id;
+        title = item.title;
+        price = item.price;
+        product_img = item.product_img;
+
+        // console.log(pk, title, price, product_img)
         $("#productList").append('<div class="col-12 col-md-6 col-lg-4" id="product">' +
             '<div class="clean-product-item">' +
-            '<div class="image"><a href="' + "/shopping/detail/" + item.pk + '"><img class="img-fluid d-block mx-auto" src="/static/' + item.fields.product_img + '"></a></div>' +
-            '<div class="product-name"><a href="' + "/shopping/detail/" + item.pk + '">' + item.fields.title + '</a></div>' +
+            '<div class="image"><a href="' + "/shopping/detail/" + pk + '"><img class="img-fluid d-block mx-auto" src="/static/' + product_img + '"></a></div>' +
+            '<div class="product-name"><a href="' + "/shopping/detail/" + pk + '">' + title + '</a></div>' +
             '<div class="about">' +
             '<div class="rating"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star.svg"><img src="/static/assets/img/star-half-empty.svg"><img src="/static/assets/img/star-empty.svg"></div>' +
             '<div class="price">' +
-            '<h3>' + Number(item.fields.price).toFixed(1) + '$</h3>' +
+            '<h3>' + Number(price).toFixed(1) + '$</h3>' +
             '</div>' +
             '</div>' +
             '</div>' +
             '</div>')
-    })
+    }
 }
+
 
 function init(){
     //init
-    var data = JSON.parse(document.getElementById('json-data').textContent);
-    // console.log(data)
+    var prep = document.getElementById('json-data').textContent;
+    console.log("prep from textContent: "+prep)
+
+    var data = JSON.parse(prep);
+    pageData = data;
+    current_page = 1;
+    // console.log("data from textContent:"+data)
     
+    //reset products
+    resetData('#product')
+                    
     //reset pagination
-    resetPagination(data)
+    resetPagination()
 
     //render pagination
-    renderPagination(data)
+    renderPagination()
+
+    //render new products
+    renderData();
 }
 
 $(document).ready(function () {
-    // $("#pagi").on('click', '.page-item', function(){
-    //     console.log("hehe")
-        
-    //     //event here
-    // })
+    current_page = 1;
+
+    $("#pagi").on('click', '#pagiItem', function(){
+        // console.log("hehe")
+        // console.log($(this).val()+" "+$(this).attr('name'))
+
+        var page = Number($(this).val());
+        var option = $(this).attr('name');
+
+        //event here
+        if(page != 0){
+            if(page != current_page && page <= numPages){
+                console.log("OK")
+                
+                loadPage($(this),page);
+            }
+        }
+        else{
+            if(option == 'prev' && current_page>1){
+                console.log("prev")
+            }
+            if(option == 'next' && current_page<numPages){
+                console.log("next")
+            }
+        }
+    })
 
     init()
-
-    // var productList = JSON.parse('{{ productlist }}');
-
-    // var obj = jQuery.parseJSON(JSON.stringify('{{productlist}}')); //better JSON
-    //                 // console.log(typeof obj)
-    //                 // console.log(obj)
-
 
     var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
 
@@ -104,33 +206,40 @@ $(document).ready(function () {
                 type: 'post',
                 dataType: 'json',
                 success: function (response) {
-                    console.log(JSON.stringify(response));
+                    // console.log(JSON.stringify(response));
                     var obj = jQuery.parseJSON(JSON.stringify(response)); //better JSON
                     // console.log(typeof obj)
                     // console.log(obj)
-
+                    
                     var data = JSON.parse(obj);
-
+                    console.log("prep from obj: "+obj)
+                    // console.log("data from object:"+data)
+                    
+                    pageData = data;
+                    clean(data);
+                    current_page = 1;
                     // const productList = document.querySelectorAll('#productlist') //get all element with id 'productList'
 
                     //reset products
                     resetData('#product')
                     
                     //reset pagination
-                    resetPagination(data)
+                    resetPagination()
 
                     //render pagination
-                    renderPagination(data)
+                    renderPagination()
 
                     //render new products
-                    renderData(data);
+                    renderData();
 
-                    const category_inputs = document.querySelectorAll('#category0') //get all element with above id
-                    category_inputs.forEach(function (category_input) {
-                        // $(product).remove() //remove all
-                        // console.log("hehe")
-                        $(category_input).prop('checked', true) //set all #category 0 to 'checked'
-                    })
+                    // const category_inputs = document.querySelectorAll('#category0') //get all element with above id
+                    // category_inputs.forEach(function (category_input) {
+                    //     // $(product).remove() //remove all
+                    //     // console.log("hehe")
+                    //     $(category_input).prop('checked', true) //set all #category 0 to 'checked'
+                    // })
+
+                    $('#category0').prop('checked', true)
                 }
             })
         }
@@ -166,20 +275,23 @@ $(document).ready(function () {
                 console.log(obj)
 
                 var data = JSON.parse(obj);
+                pageData = data;
 
+                clean(data);
+                current_page = 1;
                 // const productList = document.querySelectorAll('#productlist') //get all element with id 'productList'
 
                 //reset products
                 resetData('#product')
-                    
+                
                 //reset pagination
-                resetPagination(data)
+                resetPagination()
 
                 //render pagination
-                renderPagination(data)
+                renderPagination()
 
                 //render new products
-                renderData(data);
+                renderData();
 
                 $("#searchInfo").val("")
             }
@@ -215,20 +327,23 @@ $(document).ready(function () {
                 console.log(obj)
 
                 var data = JSON.parse(obj);
-
+                pageData = data;
+                
+                clean(data);
+                current_page = 1;
                 // const productList = document.querySelectorAll('#productlist') //get all element with id 'productList'
 
                 //reset products
                 resetData('#product')
-                    
+                
                 //reset pagination
-                resetPagination(data)
+                resetPagination()
 
                 //render pagination
-                renderPagination(data)
+                renderPagination()
 
                 //render new products
-                renderData(data);
+                renderData();
 
                 $("#searchInfo").val("")
             }
