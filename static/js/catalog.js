@@ -96,6 +96,10 @@ function renderData(){
 }
 
 function loadPage(chosenPage){
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
+    setTimeout(function(){
+        //do what you need here
+        
     var ele
     var eles = document.getElementById("pagi").getElementsByTagName('li');
 
@@ -152,6 +156,8 @@ function loadPage(chosenPage){
             '</div>' +
             '</div>')
     }
+    }, 1000);
+
 }
 
 function init(){
